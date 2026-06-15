@@ -552,6 +552,16 @@ function renderChart(days= 14) {
         options: {
             responsive: true,
             interaction: { mode: 'index', intersect: false },
+            plugins: {
+        // 1. 控制圖表中央的提示框（Tooltip）
+        tooltip: {
+            callbacks: {
+                title: function(context) {
+                    return context[0].label;
+                }
+            }
+        }
+    },
             elements: {
         point: {
             radius: 2,           // 正常狀態下的點半徑 (設為 0 可隱藏)
@@ -613,12 +623,24 @@ function renderChart(days= 14) {
 },
 
                 x: {
-                    ticks: { color: '#aaa' },
+                    ticks: { color: '#aaa',
+                        callback: function(val, index) {
+                            // 拿到目前的原始日期文字 (如 "2026-06-13" 或 "2026/06/13")
+                            const rawDate = this.getLabelForValue(val);
+                            const dateObj = new Date(rawDate);
+                            
+                            if (!isNaN(dateObj)) {
+                                const month = dateObj.getMonth() + 1; // 取得月份 (不補零)
+                                const day = dateObj.getDate();        // 取得日期 (不補零)
+                                return `${month}/${day}`;             // 回傳成 6/13 格式
+                            }
+                            return rawDate; // 萬一解析失敗則回傳原始值
+                        }
+                    },
                     grid: { color: '#333' }
                 }
             }
-}
-        
+        }
     });
 
 // 2. 在 Chart 初始化後，新增此邏輯產生勾選框
